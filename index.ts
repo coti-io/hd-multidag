@@ -1,6 +1,6 @@
 import { mnemonicToSeed } from 'bip39';
 import { hdkey } from 'ethereumjs-wallet';
-import { cryptoUtils, nodeUtils, transactionUtils } from '@coti-io/crypto';
+import { cryptoUtils, nodeUtils, Transaction, transactionUtils } from '@coti-io/crypto';
 import { HardForks } from '@coti-io/crypto/dist/utils/transactionUtils';
 import * as readline from 'readline';
 import * as process from 'process';
@@ -36,7 +36,7 @@ async function main() {
     const sourceKeyPair = cryptoUtils.getKeyPairFromPublicHash(sourceWallet.getPublicKey().toString('hex'));
     const sourceAddress = cryptoUtils.getAddressHexByKeyPair(sourceKeyPair);
 
-    const amount = process.env.AMOUNT;
+    const amount = Number(process.env.AMOUNT);
     const currencyHash = currency.currencyHash;
     const destinationAddress = process.env.DESTINATION_ADDRESS!;
     const inputMap = new Map();
@@ -55,6 +55,9 @@ async function main() {
     });
     transaction.signWithPrivateKeys(userPrivateKey, [sourcePrivateKey, sourcePrivateKey]);
 
+    if (!validateTransaction(transaction, destinationAddress, amount)) {
+      throw new Error('Invalid transaction');
+    }
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -86,6 +89,11 @@ async function getCurrencyDetails(currencySymbol: string, fullnode: string) {
   const { data } = await axios.post(`${fullnode}/currencies/token/symbol/details`, payload, { headers });
 
   return data.token;
+}
+
+function validateTransaction(transaction: Transaction, destinationAddress: string, amount: number) {
+  const receiverBaseTransaction = transaction.getOutputBaseTransactions()[2];
+  return receiverBaseTransaction.getAddressHash() == destinationAddress && Number(receiverBaseTransaction.getAmount()) == amount;
 }
 
 main().then(() => {});
