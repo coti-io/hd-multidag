@@ -29,7 +29,8 @@ async function main() {
     const accountWallet = hdwallet.derivePath(accountPath).getWallet();
     const userPrivateKey = accountWallet.getPrivateKey().toString('hex');
 
-    const sourcePath = accountPath + '/0';
+    const sourceIndex = process.env.SOURCE_INDEX;
+    const sourcePath = accountPath + '/' + sourceIndex;
     const sourceWallet = hdwallet.derivePath(sourcePath).getWallet();
     const sourcePrivateKey = sourceWallet.getPrivateKey().toString('hex');
     const sourceKeyPair = cryptoUtils.getKeyPairFromPublicHash(sourceWallet.getPublicKey().toString('hex'));
@@ -66,7 +67,7 @@ async function main() {
       const transactionResponse = await nodeUtils.sendTransaction(transaction, undefined, fullnode);
 
       console.log(`Transaction hash: ${transaction.getHash()}`);
-      console.log(transactionResponse);
+      console.log(JSON.stringify(transactionResponse));
       rl.close();
     });
   } catch (error: any) {

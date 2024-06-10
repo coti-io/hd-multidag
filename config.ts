@@ -23,6 +23,7 @@ const config_schema = Joi.object({
       return value;
     })
     .required(),
+  SOURCE_INDEX: Joi.number().integer().required(),
 }).unknown();
 
 export { config_schema };
