@@ -13,7 +13,7 @@ npm install
 Next, copy the example.env file:
 
 ```apache
-cp .example-env .env
+cp example.env .env
 ```
 
 Insert your data to the .env file:
